@@ -11,22 +11,26 @@ $swoAntimalware = @{"swoAntimalware"="0"}
 
 
 $virtualMachine = Get-AzResource -ResourceType 'Microsoft.Compute/VirtualMachines'
+# $exclude = @('vm-appwin')
 
 
 # Set Azure Context
 # Set-AzContext -Tenant '$tenantId' -Subscription '$subscriptionId'
 
-if ($null -ne $swoMonitor) {
-    if ($swoMonitor.enforcement -eq 'true') {
-        Write-Host 'Policy enforcement is set to true, Tag is replaced'
-        
+foreach ($vm in $virtualMachine) {
+    if ($null -ne $swoMonitor) {
+        if ($swoMonitor.enforcement -eq 'true') {
+            if ($exclude -notcontains $vm.Name ) {
+                Write-Host 'Policy enforcement is set to true, Tag is replaced on '$vm.Name''
+            }
+        }
+        else {
+            if ($exclude -notcontains $vm.Name ) {
+                Write-Host 'Tag is updated on '$vm.Name''
+            }
+        }
     }
     else {
-        Write-Host 'Tag is updated'
+        Write-Host 'No Policy found for '$vm.Name''
     }
 }
-else {
-    Write-Host "No Policy found"
-    Write-Host "Update-AzTag -ResourceId /subscriptions/{subId} -Tag $Tags -Operation Delete"
-}
-
