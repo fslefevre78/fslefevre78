@@ -65,17 +65,10 @@ $MasterKey = "pGEVzXsP34MMsWWTM0YEK7G7htkXjlsM22qwCuoUnyohVDXg7XUsRGmfyWPC3lQdP7
 # query string
 $Query = "SELECT * FROM c WHERE c.id='NL-SCU-666'"
 
-$Query = "SELECT * FROM c WHERE ARRAY_CONTAINS(c.site24x7.tagPolicy, id='85429adb-9e97-44af-9da0-a01bb221407e')"
-
-$Query = "SELECT "
-
-
-
-
+$Query = "SELECT a.id, a.tagValue FROM c JOIN a in c.site24x7.tagPolicy WHERE a.id='85429adb-9e97-44af-9da0-a01bb221407e'"
 
 # execute
-$response  = Query-CosmosDb -EndPoint $CosmosDBEndPoint -DataBaseId $DataBaseId -CollectionId $CollectionId -MasterKey $MasterKey -Query $Query
-$response = $response | ConvertFrom-Json -AsHashtable
+$response  = Query-CosmosDb -EndPoint $CosmosDBEndPoint -DataBaseId $DataBaseId -CollectionId $CollectionId -MasterKey $MasterKey -Query $Query | ConvertFrom-Json -AsHashtable
 $response
 
 Write-Host 'Customername =' $response.Documents.customerName
