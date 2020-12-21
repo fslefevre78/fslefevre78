@@ -68,10 +68,10 @@ $CollectionId = "managedCustomer"
 $MasterKey = "pGEVzXsP34MMsWWTM0YEK7G7htkXjlsM22qwCuoUnyohVDXg7XUsRGmfyWPC3lQdP7hNXVsOvnf8B3vJEwZsLQ=="
 
 # query string
-$querySite24x7 = "SELECT a.id, a.tagValue FROM c JOIN a in c.site24x7.tagPolicy WHERE a.id='$($subscriptionId)'"
-$queryCommvault = "SELECT a.id, a.tagValue FROM c JOIN a in c.commvault.tagPolicy WHERE a.id='$($subscriptionId)'"
-$queryDesktopCentral = "SELECT a.id, a.tagValue FROM c JOIN a in c.desktopCentral.tagPolicy WHERE a.id='$($subscriptionId)'"
-$queryTrendMicro = "SELECT a.id, a.tagValue FROM c JOIN a in c.trendMicro.tagPolicy WHERE a.id='$($subscriptionId)'"
+$querySite24x7 = "SELECT a.id, a.tagValue, a.enforce, a.exclude FROM c JOIN a in c.site24x7.tagPolicy WHERE a.id='$($subscriptionId)'"
+$queryCommvault = "SELECT a.id, a.tagValue, a.enforce, a.exclude FROM c JOIN a in c.commvault.tagPolicy WHERE a.id='$($subscriptionId)'"
+$queryDesktopCentral = "SELECT a.id, a.tagValue, a.enforce, a.exclude FROM c JOIN a in c.desktopCentral.tagPolicy WHERE a.id='$($subscriptionId)'"
+$queryTrendMicro = "SELECT a.id, a.tagValue, a.enforce, a.exclude FROM c JOIN a in c.trendMicro.tagPolicy WHERE a.id='$($subscriptionId)'"
 
 # execute
 $responseSite24x7  = Query-CosmosDb -EndPoint $CosmosDBEndPoint -DataBaseId $DataBaseId -CollectionId $CollectionId -MasterKey $MasterKey -Query $querySite24x7 | ConvertFrom-Json -AsHashtable
@@ -79,23 +79,22 @@ $responseCommvault  = Query-CosmosDb -EndPoint $CosmosDBEndPoint -DataBaseId $Da
 $responseDesktopCentral  = Query-CosmosDb -EndPoint $CosmosDBEndPoint -DataBaseId $DataBaseId -CollectionId $CollectionId -MasterKey $MasterKey -Query $queryDesktopCentral | ConvertFrom-Json -AsHashtable
 $responseTrendMicro  = Query-CosmosDb -EndPoint $CosmosDBEndPoint -DataBaseId $DataBaseId -CollectionId $CollectionId -MasterKey $MasterKey -Query $queryTrendMicro | ConvertFrom-Json -AsHashtable
 
-
-
-# --------
-
-$virtualMachine = Get-AzResource -ResourceType 'Microsoft.Compute/VirtualMachines'
-# $exclude = @('vm-appwin')
-
-
 # Set Azure Context
 # Set-AzContext -Tenant '$tenantId' -Subscription '$subscriptionId'
 
+# Create VirtualMachine List
+$vm = Get-AzResource -ResourceType 'Microsoft.Compute/VirtualMachines'
+
+
 foreach ($vm in $virtualMachine) {
-    if ($null -ne $swoMonitor) {
-        if ($swoMonitor.enforcement -eq 'true') {
-            if ($exclude -notcontains $vm.Name ) {
+    if ($null -ne $responseSite24x7.Documents.tagValue) {
+        if ($responseSite24x7.Documents.enforce -eq $true) {
+            if ($responseSite24x7.Documents.exclude -notcontains $vm.Name) {
                 Write-Host 'Policy enforcement is set to true, Tag is replaced on '$vm.Name''
             }
+			else {
+				Write-Host 'Policy enforcement is set to true but '$vm.Name' is set to exclude'
+			}
         }
         else {
             if ($exclude -notcontains $vm.Name ) {
