@@ -113,5 +113,6 @@ foreach ($vm in $virtualMachine) {
     }
     else {
         Write-Host 'No Policy found for '$vm.Name''
+		Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoMonitor"="$($responseSite24x7.Documents.tagValue)"} -Operation Delete 
     }
 }
