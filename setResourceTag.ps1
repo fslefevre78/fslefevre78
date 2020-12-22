@@ -98,8 +98,13 @@ foreach ($vm in $virtualMachine) {
         }
         else {
             if ($responseSite24x7.Documents.exclude -notcontains $vm.Name ) {
-                Write-Host 'Tag is updated on '$vm.Name''
-            }
+				if ($null -ne $vm.Tags.swoMonitor) {
+					Write-Host 'Tag is not updated as it already exists on '$vm.name''
+				}
+				else {
+					Write-Host 'Tag is updated on '$vm.Name''
+				}
+			}
 			else {
 				Write-Host 'Policy tag is ignored as '$vm.Name' is set to exclude'
 			}
