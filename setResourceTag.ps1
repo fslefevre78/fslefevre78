@@ -83,7 +83,7 @@ $responseTrendMicro  = Query-CosmosDb -EndPoint $CosmosDBEndPoint -DataBaseId $D
 # Set-AzContext -Tenant '$tenantId' -Subscription '$subscriptionId'
 
 # Create VirtualMachine List
-$vm = Get-AzResource -ResourceType 'Microsoft.Compute/VirtualMachines'
+$virtualMachine = Get-AzResource -ResourceType 'Microsoft.Compute/VirtualMachines'
 
 
 foreach ($vm in $virtualMachine) {
@@ -93,13 +93,16 @@ foreach ($vm in $virtualMachine) {
                 Write-Host 'Policy enforcement is set to true, Tag is replaced on '$vm.Name''
             }
 			else {
-				Write-Host 'Policy enforcement is set to true but '$vm.Name' is set to exclude'
+				Write-Host 'Policy enforcement is ignored as '$vm.Name' is set to exclude'
 			}
         }
         else {
-            if ($exclude -notcontains $vm.Name ) {
+            if ($responseSite24x7.Documents.exclude -notcontains $vm.Name ) {
                 Write-Host 'Tag is updated on '$vm.Name''
             }
+			else {
+				Write-Host 'Policy tag is ignored as '$vm.Name' is set to exclude'
+			}
         }
     }
     else {
