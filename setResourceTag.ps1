@@ -85,6 +85,7 @@ $responseTrendMicro  = Query-CosmosDb -EndPoint $CosmosDBEndPoint -DataBaseId $D
 # Create VirtualMachine List
 $virtualMachine = Get-AzResource -ResourceType 'Microsoft.Compute/VirtualMachines'
 
+# Site24x7 Tag
 foreach ($vm in $virtualMachine) {
     if ($null -ne $responseSite24x7.Documents.tagValue) {
         if ($responseSite24x7.Documents.enforce -eq $true) {
@@ -116,3 +117,102 @@ foreach ($vm in $virtualMachine) {
 		Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoMonitor"="$($responseSite24x7.Documents.tagValue)"} -Operation Delete 
     }
 }
+
+# Commvault Tag
+foreach ($vm in $virtualMachine) {
+	if ($null -ne $responseCommvault.Documents.tagValue) {
+		if ($responseCommvault.Documents.enforce -eq $true) {
+			if ($responseCommvault.Documents.exclude -notcontains $vm.Name) {
+				Write-Host 'Policy enforcement is set to true, Tag is replaced on '$vm.Name''
+				Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoBackup"="$($responseCommvault.Documents.tagValue)"} -Operation Merge
+			}
+			else {
+				Write-Host 'Policy enforcement is ignored as '$vm.Name' is set to exclude'
+			}
+		}
+		else {
+			if ($responseCommvault.Documents.exclude -notcontains $vm.Name ) {
+				if ($null -ne $vm.Tags.swoBackup) {
+					Write-Host 'Tag is not updated as it already exists on '$vm.name''
+				}
+				else {
+					Write-Host 'Tag is updated on '$vm.Name''
+					Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoBackup"="$($responseCommvault.Documents.tagValue)"} -Operation Merge
+				}
+			}
+			else {
+				Write-Host 'Policy tag is ignored as '$vm.Name' is set to exclude'
+			}
+		}
+	}
+	else {
+		Write-Host 'No Policy found for '$vm.Name''
+		Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoBackup"="$($responseCommvault.Documents.tagValue)"} -Operation Delete
+	}
+ } 
+
+# Desktop Central Tag
+foreach ($vm in $virtualMachine) {
+	if ($null -ne $responseDesktopCentral.Documents.tagValue) {
+		if ($responseDesktopCentral.Documents.enforce -eq $true) {
+			if ($responseDesktopCentral.Documents.exclude -notcontains $vm.Name) {
+				Write-Host 'Policy enforcement is set to true, Tag is replaced on '$vm.Name''
+				Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoPatch"="$($responseDesktopCentral.Documents.tagValue)"} -Operation Merge
+			}
+			else {
+				Write-Host 'Policy enforcement is ignored as '$vm.Name' is set to exclude'
+			}
+		}
+		else {
+			if ($responseDesktopCentral.Documents.exclude -notcontains $vm.Name ) {
+				if ($null -ne $vm.Tags.swoPatch) {
+					Write-Host 'Tag is not updated as it already exists on '$vm.name''
+				}
+				else {
+					Write-Host 'Tag is updated on '$vm.Name''
+					Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoPatch"="$($responseDesktopCentral.Documents.tagValue)"} -Operation Merge
+				}
+			}
+			else {
+				Write-Host 'Policy tag is ignored as '$vm.Name' is set to exclude'
+			}
+		}
+	}
+	else {
+		Write-Host 'No Policy found for '$vm.Name''
+		Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoPatch"="$($responseDesktopCentral.Documents.tagValue)"} -Operation Delete
+	}
+ }
+ 
+# TrendMicro Tag
+foreach ($vm in $virtualMachine) {
+	if ($null -ne $responseTrendMicro.Documents.tagValue) {
+		if ($responseTrendMicro.Documents.enforce -eq $true) {
+			if ($responseTrendMicro.Documents.exclude -notcontains $vm.Name) {
+				Write-Host 'Policy enforcement is set to true, Tag is replaced on '$vm.Name''
+				Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoAntiMalware"="$($responseTrendMicro.Documents.tagValue)"} -Operation Merge
+			}
+			else {
+				Write-Host 'Policy enforcement is ignored as '$vm.Name' is set to exclude'
+			}
+		}
+		else {
+			if ($responseTrendMicro.Documents.exclude -notcontains $vm.Name ) {
+				if ($null -ne $vm.Tags.swoAntiMalware) {
+					Write-Host 'Tag is not updated as it already exists on '$vm.name''
+				}
+				else {
+					Write-Host 'Tag is updated on '$vm.Name''
+					Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoAntiMalware"="$($responseTrendMicro.Documents.tagValue)"} -Operation Merge
+				}
+			}
+			else {
+				Write-Host 'Policy tag is ignored as '$vm.Name' is set to exclude'
+			}
+		}
+	}
+	else {
+		Write-Host 'No Policy found for '$vm.Name''
+		Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoAntiMalware"="$($responseTrendMicro.Documents.tagValue)"} -Operation Delete
+	}
+ } 
