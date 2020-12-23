@@ -85,6 +85,9 @@ $responseTrendMicro  = Query-CosmosDb -EndPoint $CosmosDBEndPoint -DataBaseId $D
 # Create VirtualMachine List
 $virtualMachine = Get-AzResource -ResourceType 'Microsoft.Compute/VirtualMachines'
 
+# Site24x7 Tag
+Write-Host 'Applying tag swoMonitor'
+
 foreach ($vm in $virtualMachine) {
     if ($null -ne $responseSite24x7.Documents.tagValue) {
         if ($responseSite24x7.Documents.enforce -eq $true) {
@@ -117,8 +120,9 @@ foreach ($vm in $virtualMachine) {
     }
 }
 
-
 # Commvault Tag
+Write-Host 'Applying tag swoBackup'
+
 foreach ($vm in $virtualMachine) {
 	if ($null -ne $responseCommvault.Documents.tagValue) {
 		if ($responseCommvault.Documents.enforce -eq $true) {
@@ -149,9 +153,11 @@ foreach ($vm in $virtualMachine) {
 		Write-Host 'No Policy found for '$vm.Name''
 		Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoBackup"="$($responseCommvault.Documents.tagValue)"} -Operation Delete
 	}
- } 
+} 
 
 # Desktop Central Tag
+Write-Host 'Applying tag swoPatch'
+
 foreach ($vm in $virtualMachine) {
 	if ($null -ne $responseDesktopCentral.Documents.tagValue) {
 		if ($responseDesktopCentral.Documents.enforce -eq $true) {
@@ -182,9 +188,11 @@ foreach ($vm in $virtualMachine) {
 		Write-Host 'No Policy found for '$vm.Name''
 		Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoPatch"="$($responseDesktopCentral.Documents.tagValue)"} -Operation Delete
 	}
- }
- 
+}
+
 # TrendMicro Tag
+Write-Host 'Applying tag swoAntiMalware'
+
 foreach ($vm in $virtualMachine) {
 	if ($null -ne $responseTrendMicro.Documents.tagValue) {
 		if ($responseTrendMicro.Documents.enforce -eq $true) {
