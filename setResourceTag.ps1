@@ -85,7 +85,6 @@ $responseTrendMicro  = Query-CosmosDb -EndPoint $CosmosDBEndPoint -DataBaseId $D
 # Create VirtualMachine List
 $virtualMachine = Get-AzResource -ResourceType 'Microsoft.Compute/VirtualMachines'
 
-# Site24x7 Tag
 foreach ($vm in $virtualMachine) {
     if ($null -ne $responseSite24x7.Documents.tagValue) {
         if ($responseSite24x7.Documents.enforce -eq $true) {
@@ -118,6 +117,7 @@ foreach ($vm in $virtualMachine) {
     }
 }
 
+
 # Commvault Tag
 foreach ($vm in $virtualMachine) {
 	if ($null -ne $responseCommvault.Documents.tagValue) {
@@ -137,7 +137,7 @@ foreach ($vm in $virtualMachine) {
 				}
 				else {
 					Write-Host 'Tag is updated on '$vm.Name''
-					Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoBackup"="$($responseCommvault.Documents.tagValue)"} -Operation Merge
+					Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoBackup" = "$($responseCommvault.Documents.tagValue)" } -Operation Merge
 				}
 			}
 			else {
@@ -215,4 +215,4 @@ foreach ($vm in $virtualMachine) {
 		Write-Host 'No Policy found for '$vm.Name''
 		Update-AzTag -ResourceId $vm.ResourceId -Tag @{"swoAntiMalware"="$($responseTrendMicro.Documents.tagValue)"} -Operation Delete
 	}
- } 
+ }
